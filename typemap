@@ -1,0 +1,10 @@
+UINT                    T_U_INT
+DWORD_PTR               T_UV
+DWORD                   T_NV
+DWORD *                 T_PV
+LPCSTR                  T_PV
+LPCTSTR                 T_PV
+BOOL                    T_IV
+LPTSTR                  T_PV
+HANDLE                  T_PTR
+
