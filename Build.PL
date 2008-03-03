@@ -5,13 +5,19 @@
 # A copy of the License was distributed with this file or you may obtain a 
 # copy of the License from http://dev.perl.org/licenses/
 
+use lib qw(inc);
+use Devel::AssertOS qw(MSWin32);
+use Devel::CheckLib;
+check_lib_or_exit(
+    lib => [qw(kernel32)]
+);
+
 use Module::Build;
 my $build = Module::Build->new(
     module_name => 'Win32::Process::SafeTerminate',
     dist_author => 'David Golden <dagolden@cpan.org>',
-    license => 'perl',
+    license => 'apache',
     create_readme => 1,
-#   create_makefile_pl  => 'traditional',
     requires => {
         'perl' => '5.004',
     },

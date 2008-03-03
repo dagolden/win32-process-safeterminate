@@ -24,6 +24,10 @@
 ^cover_db
 ^.*\.bat$
 
+# generated from XS
+\.c$
+\.o$
+
 # Temp, old, vi and emacs files.
 ~$
 \.old$
