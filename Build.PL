@@ -26,11 +26,7 @@ my $build = Module::Build->new(
     },
     meta_add            => { 
         no_index => { 
-            directory => [ qw{
-                examples
-                inc
-                t
-            }],
+            directory => [ qw/ examples inc t /],
         } 
     },
 );
