@@ -1,4 +1,3 @@
-# 01-Win32-Process-SafeTerminate.t
 # Copyright (c) 2008 by David Golden. All rights reserved.
 # Licensed under terms of Perl itself (the "License").
 # You may not use this file except in compliance with the License.

@@ -18,69 +18,64 @@ MODULE = Win32::Process::SafeTerminate PACKAGE = Win32::Process::SafeTerminate
     #    on Dr. Dobb's Portal: http://www.ddj.com/windows/184416547 
     #
     #    Safely terminate a process by creating a remote thread
-    #    in the process that calls ExitProcess
+    #    in the process to terminate that calls ExitProcess
+    #
+    #    Exit code defaults to 15 (e.g. SIGTERM)
 
 BOOL 
-SafeTerminateProcess(hProcess, uExitCode)
-    HANDLE hProcess
-    UINT uExitCode
+safe_terminate(dwPID, uExitCode=15)
+    DWORD   dwPID
+    UINT    uExitCode
+PREINIT:
+    BOOL    bSuccess = FALSE;
+    DWORD   dwTID, dwCode = 0;
+    HANDLE  hProcess = NULL ;
+    HANDLE  hRemoteThread = NULL;
+    HINSTANCE hKernel;
+    FARPROC pfnExitProc;
 CODE:
-    DWORD dwTID, dwCode, dwErr = 0;
-    HANDLE hProcessDup = INVALID_HANDLE_VALUE;
-    HANDLE hRT = NULL;
-    HINSTANCE hKernel = GetModuleHandle("Kernel32");
-    BOOL bSuccess = FALSE;
-
-    BOOL bDup = DuplicateHandle(GetCurrentProcess(), 
-                                hProcess, 
-                                GetCurrentProcess(), 
-                                &hProcessDup, 
-                                PROCESS_ALL_ACCESS, 
-                                FALSE, 
-                                0);
-
-    // Detect the special case where the process is 
-    // already dead...
-    if ( GetExitCodeProcess((bDup) ? hProcessDup : hProcess, &dwCode) && 
-         (dwCode == STILL_ACTIVE) ) 
-    {
-        FARPROC pfnExitProc;
-           
-        pfnExitProc = GetProcAddress(hKernel, "ExitProcess");
-
-        hRT = CreateRemoteThread((bDup) ? hProcessDup : hProcess, 
-                                 NULL, 
-                                 0, 
-                                 (LPTHREAD_START_ROUTINE)pfnExitProc,
-                                 (PVOID)uExitCode, 0, &dwTID);
-
-        if ( hRT == NULL )
-            dwErr = GetLastError();
-    }
-    else
-    {
-        dwErr = ERROR_PROCESS_ABORTED;
+    // If we can't open the process with PROCESS_TERMINATE rights,
+    // then we have to give up
+    if ( dwPID ) {
+        hProcess = OpenProcess(
+            SYNCHRONIZE | 
+            PROCESS_TERMINATE | 
+            PROCESS_DUP_HANDLE | 
+            PROCESS_QUERY_INFORMATION, 
+            FALSE, dwPID
+        );
     }
 
+    if ( hProcess ) {
+        hKernel = GetModuleHandle("Kernel32");
 
-    if ( hRT )
-    {
-        // Must wait process to terminate to 
-        // guarantee that it has exited...
-        WaitForSingleObject((bDup) ? hProcessDup : hProcess, 
-                            INFINITE);
+        // Don't shoot a dead horse
+        if ( ( GetExitCodeProcess(hProcess, &dwCode) ) && 
+             ( dwCode == STILL_ACTIVE) ) 
+        {
+            pfnExitProc = GetProcAddress(hKernel, "ExitProcess");
 
-        CloseHandle(hRT);
-        bSuccess = TRUE;
+            hRemoteThread = CreateRemoteThread( 
+                hProcess, 
+                NULL, 
+                0, 
+                (LPTHREAD_START_ROUTINE)pfnExitProc,
+                (PVOID)uExitCode, 0, &dwTID
+            );
+
+            if ( hRemoteThread )
+            {
+                // Must wait process to terminate to 
+                // guarantee that it has exited...
+                WaitForSingleObject(hProcess, INFINITE);
+                CloseHandle(hRemoteThread);
+                bSuccess = TRUE;
+            }
+        }
+
+        CloseHandle(hProcess);
     }
-
-    if ( bDup )
-        CloseHandle(hProcessDup);
-
-    if ( !bSuccess )
-        SetLastError(dwErr);
 
     RETVAL = bSuccess;
 OUTPUT:
     RETVAL
-    uExitCode
