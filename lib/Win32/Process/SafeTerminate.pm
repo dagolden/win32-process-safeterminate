@@ -10,7 +10,7 @@ use strict;
 use warnings;
 
 our $VERSION = '0.01';
-$VERSION = eval $VERSION; # convert '1.23_45' to 1.2345
+$VERSION = eval $VERSION; 
 
 require Exporter;
 
@@ -28,11 +28,58 @@ __END__
 
 = NAME
 
-= ACKNOWLEDGEMENTS
+Win32::Process::SafeTerminate -- Safer termination of Win32::Process objects
 
-* SafeTerminateProcess adapted from article by Andrew Tucker 
+= VERSION
+
+This documentation describes version %%VERSION%%.
+
+= SYNOPSIS
+
+
+= DESCRIPTION
+
+
+= USAGE
+
+
+= BUGS
+
+Please report any bugs or feature using the CPAN Request Tracker.  
+Bugs can be submitted through the web interface at 
+[http://rt.cpan.org/Dist/Display.html?Queue=Win32-Process-SafeTerminate]
+
+When submitting a bug or request, please include a test-file or a patch to an
+existing test-file that illustrates the bug or desired feature.
+
+= ACKNOWLEDGMENTS 
+
+* Safe termination C code adapted from article by Andrew Tucker 
 on Dr. Dobb's Portal: [http://www.ddj.com/windows/184416547] 
-* XS code and typemap adapted from [Win32::Process]
+* Some XS code and typemap adapted from [Win32::Process]
+
+= AUTHOR
+
+David A. Golden (DAGOLDEN)
+
+= COPYRIGHT AND LICENSE
+
+Copyright (c) 2008 by David A. Golden
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at 
+[http://www.apache.org/licenses/LICENSE-2.0]
+
+Files produced as output though the use of this software, shall not be
+considered Derivative Works, but shall be considered the original work of the
+Licensor.
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 
 =end wikidoc
 

@@ -1,3 +1,10 @@
+    # lib/Win32/Process/SafeTerminate.pm
+    # Copyright (c) 2008 by David Golden. All rights reserved.
+    # Licensed under terms of Perl itself (the "License").
+    # You may not use this file except in compliance with the License.
+    # A copy of the License was distributed with this file or you may obtain a 
+    # copy of the License from http://dev.perl.org/licenses/
+
 #include <stdlib.h>		// avoid BCC-5.0 brainmelt
 #include <math.h>		// avoid VC-5.0 brainmelt
 #define WIN32_LEAN_AND_MEAN
