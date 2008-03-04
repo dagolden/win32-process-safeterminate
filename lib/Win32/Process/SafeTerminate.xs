@@ -35,9 +35,6 @@ PREINIT:
     FARPROC pfnExitProc;
     I32     call_ok;
 CODE:
-    // If we can't open the process with PROCESS_TERMINATE rights,
-    // then we have to give up
-
     if ( ! uExitCode ) 
         uExitCode = 15;
 
