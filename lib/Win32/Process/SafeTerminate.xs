@@ -23,30 +23,39 @@ MODULE = Win32::Process::SafeTerminate PACKAGE = Win32::Process::SafeTerminate
     #    Exit code defaults to 15 (e.g. SIGTERM)
 
 BOOL 
-safe_terminate(dwPID, uExitCode=15)
-    DWORD   dwPID
-    UINT    uExitCode
+safe_terminate(process_obj, uExitCode)
+    SV *    process_obj 
+    UINT   uExitCode
 PREINIT:
     BOOL    bSuccess = FALSE;
     DWORD   dwTID, dwCode = 0;
-    HANDLE  hProcess = NULL ;
+    HANDLE  hProcess = NULL;
     HANDLE  hRemoteThread = NULL;
     HINSTANCE hKernel;
     FARPROC pfnExitProc;
+    I32     call_ok;
 CODE:
     // If we can't open the process with PROCESS_TERMINATE rights,
     // then we have to give up
-    if ( dwPID ) {
-        hProcess = OpenProcess(
-            SYNCHRONIZE | 
-            PROCESS_TERMINATE | 
-            PROCESS_DUP_HANDLE | 
-            PROCESS_QUERY_INFORMATION, 
-            FALSE, dwPID
-        );
+
+    if ( ! uExitCode ) 
+        uExitCode = 15;
+
+    if ( process_obj ) {
+        dSP;
+        PUSHMARK(SP);
+        XPUSHs(process_obj);
+        PUTBACK;
+        call_ok = call_method("get_process_handle",G_SCALAR);
+
+        if ( call_ok != 1) 
+            croak("Couldn't retrieve process handle");
+            
+        hProcess = (HANDLE) POPl;
     }
 
     if ( hProcess ) {
+
         hKernel = GetModuleHandle("Kernel32");
 
         // Don't shoot a dead horse
@@ -60,13 +69,15 @@ CODE:
                 NULL, 
                 0, 
                 (LPTHREAD_START_ROUTINE)pfnExitProc,
-                (PVOID)uExitCode, 0, &dwTID
+                (LPVOID)uExitCode, 0, &dwTID
             );
 
             if ( hRemoteThread )
             {
                 // Must wait process to terminate to 
                 // guarantee that it has exited...
+                // through really should wait only a bit and give up
+                // in case of deadlock
                 WaitForSingleObject(hProcess, INFINITE);
                 CloseHandle(hRemoteThread);
                 bSuccess = TRUE;

@@ -9,7 +9,7 @@ use warnings;
 
 use Test::More;
 
-plan tests => 4;
+plan tests => 5;
 
 use Win32::Process 
     qw/ NORMAL_PRIORITY_CLASS CREATE_SUSPENDED STILL_ACTIVE /;
@@ -31,18 +31,18 @@ ok( $process, "Started child process" );
 $process->GetExitCode($exitcode);
 is( $exitcode, STILL_ACTIVE, "Child process is active" );
 
-$pid = $process->GetProcessID;
-ok( safe_terminate($pid), "Called safe_terminate with no exit code" )
+ok( safe_terminate($process, 15), "Called safe_terminate with exit code 15" )
     or diag "ERROR: $^E";
 
 $process->GetExitCode($exitcode);
+isnt( $exitcode, STILL_ACTIVE, "Child process is dead" );
 is( $exitcode, 15, "Child process exited with code 15" );
 
 # cleanup in case SafeTerminate didn't
 $process->GetExitCode($exitcode);
-$process->Kill(15) if $exitcode == STILL_ACTIVE;
-
-
-
+if ( $exitcode == STILL_ACTIVE ) {
+    diag "!!! Cleaning up unkilled process !!!\n";
+    $process->Kill(15);
+}
 
 

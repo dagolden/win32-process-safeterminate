@@ -7,4 +7,3 @@ LPCTSTR                 T_PV
 BOOL                    T_IV
 LPTSTR                  T_PV
 HANDLE                  T_PTR
-
